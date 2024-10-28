@@ -173,15 +173,15 @@ async fn main() -> Result<()> {
 		.add_source(config::File::new(cfgpath, config::FileFormat::Toml))
 		.build()?;
     let settings : Settings = cfg.try_deserialize()?;
+    println!("Read settings {settings:?}");
     // connect to influx
     let mut influx = Influx::new(&settings.influxdb);
     influx.connect().await?;
     let request_url = settings.airgradient.url + "/measures/current";
     let mut interval = tokio::time::interval(Duration::from_secs(settings.airgradient.delaysecs));
+    println!("Starting");
     loop {
-        println!("Fetching data");
         let data = reqwest::get(&request_url).await?.json::<AirGradientData>().await?;
-        println!("got: {data:?}");
         let aqi = compute_aqi(&data);
         influx.write_point(&data, aqi).await?;
         interval.tick().await;
