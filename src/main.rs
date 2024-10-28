@@ -158,7 +158,7 @@ fn compute_aqi(data: &AirGradientData) -> u32 {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    use std::{thread::sleep, time::Duration};
+    use std::time::Duration;
 		// Read config
     use std::env;
     let args: Vec<String> = env::args().collect();
@@ -185,6 +185,5 @@ async fn main() -> Result<()> {
         let aqi = compute_aqi(&data);
         influx.write_point(&data, aqi).await?;
         interval.tick().await;
-        sleep(Duration::from_secs(settings.airgradient.delaysecs));
     };
 }
