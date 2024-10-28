@@ -1,0 +1,18 @@
+[airgradient]
+url = "<your airgradient device's URL here>"
+# actual monitor frequency is in the seconds
+# but it only outputs new values about every 60 seconds, taking it's own average.
+# The request takes some time, so at 55 we should avoid missing a sample
+# we will see some aliasing, but probably don't care
+delaysecs = 55
+
+[influxdb]
+enable = true
+token = "<your influxDB access token here>"
+bucket = "<your influxDB bucket here>"
+url = "<your influxDB url here>"
+org = "<your influxDB org here"
+# we use this rather than a "map" because map keys
+# are case squashed in the rust config library we're using
+# using an array of tables here is a workaround
+tags = [ {key="airgradient", val="1"}, {key="outdoors", val=true}, ]
