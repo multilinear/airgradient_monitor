@@ -44,7 +44,6 @@ struct SettingsPair {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct InfluxSettings {
-    enable: bool,
     token: String,
     bucket: String,
     org: String,
@@ -65,7 +64,6 @@ impl Influx {
         }
     }
     pub async fn connect(&mut self) -> Result<()> {
-      if !self.cfg.enable { return Ok(()); }
       match self.client {
         Some(_) => Ok(()),
         None =>  {
@@ -78,13 +76,11 @@ impl Influx {
           },
       }
     }
-    pub async fn disconnect(&mut self) -> Result<()> {
+    pub fn disconnect(&mut self) {
         self.client = None;
-        Ok(())
     }
     //pub async fn write_point(&mut self, data: &Vec<RegData>, names: &Vec<String>) -> Result<()> {
     pub async fn write_point(&mut self, data: &AirGradientData, aqi: u32) -> Result<()> {
-        if !self.cfg.enable { return Ok(()); }
         // Automatically reconnect if we're not connected
         self.connect().await?;
         // connect either created client, or errored out
@@ -155,6 +151,13 @@ fn compute_aqi(data: &AirGradientData) -> u32 {
     return v;
 }
 
+async fn do_stuff(influx: &mut Influx, request_url: &str) -> Result<()> {
+    let data = reqwest::get(request_url).await?.json::<AirGradientData>().await?;
+    let aqi = compute_aqi(&data);
+    influx.write_point(&data, aqi).await?;
+    return Ok(());
+}
+
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -181,9 +184,14 @@ async fn main() -> Result<()> {
     let mut interval = tokio::time::interval(Duration::from_secs(settings.airgradient.delaysecs));
     println!("Starting");
     loop {
-        let data = reqwest::get(&request_url).await?.json::<AirGradientData>().await?;
-        let aqi = compute_aqi(&data);
-        influx.write_point(&data, aqi).await?;
+        match do_stuff(&mut influx, &request_url).await {
+            Ok(()) => (),
+            Err(error) => {
+                println!("Error {error:?}");
+                // ignore errors here
+                influx.disconnect();
+            },
+        }
         interval.tick().await;
     };
 }

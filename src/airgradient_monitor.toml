@@ -7,7 +7,6 @@ url = "<your airgradient device's URL here>"
 delaysecs = 55
 
 [influxdb]
-enable = true
 token = "<your influxDB access token here>"
 bucket = "<your influxDB bucket here>"
 url = "<your influxDB url here>"
