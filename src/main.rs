@@ -96,7 +96,7 @@ impl Influx {
                .field("rco2", data.rco2 as i64)
                .field("pm01", data.pm01 as i64)
                .field("pm02", data.pm02 as i64)
-               .field("pm10", data.pm02 as i64)
+               .field("pm10", data.pm10 as i64)
                .field("pm003Count", data.pm003Count as i64)
                .field("temp", data.atmpCompensated as f64)
                .field("humidity", data.rhumCompensated as i64)
