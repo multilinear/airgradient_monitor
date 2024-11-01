@@ -181,7 +181,8 @@ async fn main() -> Result<()> {
     println!("Read settings {settings:?}");
     // connect to influx
     let mut influx = Influx::new(&settings.influxdb);
-    influx.connect().await?;
+    // If we fail that's okay, we'll retry later, so ignore errors
+    let _ = influx.connect().await;
     let request_url = settings.airgradient.url + "/measures/current";
     let mut interval = tokio::time::interval(Duration::from_secs(settings.airgradient.delaysecs));
     println!("Starting");
