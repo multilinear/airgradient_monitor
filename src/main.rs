@@ -132,7 +132,7 @@ struct Settings {
 // algo taken from https://en.wikipedia.org/wiki/Air_quality_index#United_States
 fn compute_one_aqi(datum: f64, vector: [f64; 7]) -> u32 {
     const AQI: [f64; 7] = [0.0, 50.0, 100.0, 150.0, 200.0, 300.0, 500.0];
-    let mut i = 0;
+    let mut i = 1;
     while i <= 6 && datum >= vector[i] {
         i = i + 1;
     }
