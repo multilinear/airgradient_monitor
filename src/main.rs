@@ -91,14 +91,13 @@ impl Influx {
         let timestamp = chrono::Utc::now().timestamp_nanos_opt().unwrap();
         let cfg = &self.cfg;
         // Build our point
-        let point: DataPoint = cfg.tags.iter().fold(
+        let mut builder =
             DataPoint::builder("airgradient")
                .field("rco2", data.rco2 as i64)
                .field("pm01", data.pm01 as i64)
                .field("pm02", data.pm02 as i64)
                .field("pm10", data.pm10 as i64)
                .field("pm003Count", data.pm003Count as i64)
-               .field("temp", data.atmpCompensated as f64)
                .field("humidity", data.rhumCompensated as i64)
                .field("tvoc", data.tvocRaw as i64)
                .field("tvocIndex", data.tvocIndex as i64)
@@ -108,9 +107,17 @@ impl Influx {
                .tag("firmware", &data.firmware)
                .tag("model", &data.model)
                .tag("serialno", &data.serialno)
-               .timestamp(timestamp),
-               |p, tag| p.tag(&tag.key, &tag.val)).build()?;
-         client.write(&self.cfg.bucket, futures::stream::iter([point])).await?;
+               .timestamp(timestamp);
+        builder = cfg.tags.iter().fold(builder, 
+               |p, tag| p.tag(&tag.key, &tag.val));
+        // We seem to get bad temperature values sometimes, I'm unclear why
+        // For now we jsut filter them out
+        builder = if data.atmpCompensated > -100.0 && data.atmpCompensated < 300.0 {
+                builder.field("temp", data.atmpCompensated as f64)
+            } else  {
+                builder
+            };
+         client.write(&self.cfg.bucket, futures::stream::iter([builder.build()?])).await?;
          Ok(())
     }
 }
