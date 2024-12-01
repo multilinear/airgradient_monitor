@@ -25,7 +25,6 @@ pub struct AirGradientData {
     noxRaw: i32,
     boot: i32,
     bootCount: i32,
-    ledMode: String,
     firmware: String,
     model: String,
 }
