@@ -8,9 +8,9 @@ influxdb2 = "*"
 # switch to reqwest as influxdb2 already uses it
 #ureq = {version="*", default-features=false, features=["json"]}
 reqwest = {version="*", default-features=false, features=["json"]}
-serde = "*"
+serde = {version="*", default-features=false}
 config = {version="*" , default-features=false, features=["async", "toml"]}
-chrono = {version="*", features=["now"]}
-futures = "*"
+chrono = {version="*", default-features=false, features=["now"]}
+futures = {version="*", default-features=false}
 # we're not actually using async features, but it's easier to maintain the coding style
-tokio = {version="*", features=["rt-multi-thread", "macros"]}
+tokio = {version="*", default-features=false, features=["rt-multi-thread", "macros"]}
